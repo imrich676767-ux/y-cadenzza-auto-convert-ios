@@ -1,0 +1,42 @@
+
+name: CADENZZA iOS Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build iOS Simulator app
+        run: |
+          xcodebuild \
+            -project CADENZZA.xcodeproj \
+            -scheme CADENZZA \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Save build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: CADENZZA-Simulator-Build
+          path: build/Build/Products/Debug-iphonesimulator/CADENZZA.app
